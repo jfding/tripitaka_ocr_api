@@ -7,6 +7,7 @@
 
 from tornado.web import RequestHandler, Application
 import tornado.ioloop
+from tornado.escape import to_basestring
 from tornado.options import define, options
 from tripitaka_ocr import recognize, cache
 from os import path, remove
@@ -23,6 +24,14 @@ class MainHandler(RequestHandler):
 
         img = self.request.files.get('file')
         data = dict(self.request.arguments)
+        for k, v in data.items():
+            data[k] = to_basestring(v[0])
+
+        if data.get('image_path'):
+            logging.info(data['image_path'])
+            count = recognize(image_path=data['image_path'], reset=data.get('reset'),
+                              v_num=data.get('v_num'), h_num=data.get('h_num'))
+            return self.write(str(count))
 
         data['image_file'] = image_file = img[0]['filename'] if img else data.get('image_file')
         if not image_file:
@@ -52,6 +61,9 @@ if __name__ == '__main__':
     app = make_app()
     app.listen(options.port)
     logging.info('Start the service on http://127.0.0.1:%d' % options.port)
-    tornado.ioloop.IOLoop.current().start()
+    try:
+        tornado.ioloop.IOLoop.current().start()
+    except KeyboardInterrupt:
+        logging.info('Stop the service')
 
     # Test: curl http://127.0.0.1:8010 -X POST -F "file=@/foo/bar/JS_122_1196.gif"

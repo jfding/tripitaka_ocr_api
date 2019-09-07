@@ -146,6 +146,7 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
             if page_recognize(image_file):
                 count += 1
         print('%d pages processed' % count)
+        return count
     else:
         print('Usage: python tripitaka_ocr.py --image_file=<filename> --output_path=<path> --v_num=? --h_num=?')
 

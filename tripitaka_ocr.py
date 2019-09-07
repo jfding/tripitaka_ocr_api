@@ -77,7 +77,7 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
         if not im:
             print_error('%s not exist\n' % img_file)
             return
-        img_size = img.size
+        img_size = im.size
         jpg_file = path.join(INPUT_IMAGE_PATH, '%s.jpg' % name)
 
         if not img_file.lower().endswith('.jpg'):

@@ -72,17 +72,22 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
         out_file = path.join(output_path, name + '.json')
         if not reset and path.exists(out_file):
             return
-        if not path.exists(img_file):
+
+        im = Image.open(img_file)
+        if not im:
             print_error('%s not exist\n' % img_file)
             return
+        img_size = img.size
         jpg_file = path.join(INPUT_IMAGE_PATH, '%s.jpg' % name)
+
         if not img_file.lower().endswith('.jpg'):
-            im = Image.open(img_file).convert('L')
-            im.save(jpg_file)
-            im.close()
+            img_l = im.convert('L')
+            img_l.save(jpg_file)
+            img_l.close()
         else:
             system('rm -f {0}; ln -fs {1} {0}'.format(jpg_file, img_file))
         img_file = jpg_file
+        im.close()
 
         txt_files = [path.join(OUT_TXT_PATH, '%s_task%d.txt' % (name, i)) for i in range(1, 4)]
         system('rm -f %s;' % ' '.join(txt_files))
@@ -98,18 +103,20 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
 
         pos, text = [], []  # 每个字框的坐标和文字
         texts = []  # 每列的文字
-        r = dict(name=name, run_ms=ms1 + ms2 + ms3, v_num=v_num, h_num=h_num)
+        r = dict(imgname=name, imgsize=dict(width=img_size[0], height=img_size[1]),
+                 run_ms=ms1 + ms2 + ms3, v_num=v_num, h_num=h_num)
         if line_rec:
-            if path.exists(txt_files[1]):
-                for line in open(txt_files[1]).readlines():  # 83 723 142 778 解
-                    pos.append([int(item) for item in line.split(' ')[:4]])
-                    text.append(line.strip().split(' ')[-1])
+            for line in open(txt_files[1]).readlines():  # 83 723 142 778 解
+                pos.append([int(item) for item in line.split(' ')[:4]])
+                text.append(line.strip().split(' ')[-1])
+            cc = [float(t.split(' ')[0]) for t in open(txt_files[0]).readlines()]
+            assert len(cc) == len(pos) == len(text)
 
             if path.exists(txt_files[2]):
                 texts = [t.strip() for t in open(txt_files[2]).readlines()]
 
-            r.update(dict(chars_pos=pos, chars_text=text, lines_text=texts,
-                          lines_pos=line_rec['Line_coors'], num_pos=line_rec['Num_coor']))
+            r.update(dict(cc=cc, chars_pos=pos, chars_text=text, lines_text=texts,
+                          lines_pos=line_rec.get('Line_coors'), num_pos=line_rec.get('Num_coor')))
             with open(out_file, 'w') as f:
                 json.dump(r, f, ensure_ascii=False)
             cache['count'] += 1

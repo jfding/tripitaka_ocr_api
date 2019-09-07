@@ -98,8 +98,7 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
 
         pos, text = [], []  # 每个字框的坐标和文字
         texts = []  # 每列的文字
-        r = dict(name=name, run_ms=ms1 + ms2 + ms3, v_num=v_num, h_num=h_num,
-                 chars_pos=pos, chars_text=text, lines_text=texts)
+        r = dict(name=name, run_ms=ms1 + ms2 + ms3, v_num=v_num, h_num=h_num)
         if line_rec:
             if path.exists(txt_files[1]):
                 for line in open(txt_files[1]).readlines():  # 83 723 142 778 解
@@ -109,7 +108,8 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
             if path.exists(txt_files[2]):
                 texts = [t.strip() for t in open(txt_files[2]).readlines()]
 
-            r.update(dict(lines_pos=line_rec['Line_coors'], num_pos=line_rec['Num_coor']))
+            r.update(dict(chars_pos=pos, chars_text=text, lines_text=texts,
+                          lines_pos=line_rec['Line_coors'], num_pos=line_rec['Num_coor']))
             with open(out_file, 'w') as f:
                 json.dump(r, f, ensure_ascii=False)
             cache['count'] += 1

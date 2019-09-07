@@ -10,7 +10,8 @@
 
 ## 测试
 
-- `curl http://127.0.0.1:8010 -X POST -F "file=@/foo/bar/image_file"`
+- `curl http://127.0.0.1:8010 -X POST -F "file=@/foo/bar/an_image_file"`
+- `curl http://127.0.0.1:8010 -X POST -F image_path="/foo/bar/image_image_path"`
 
 ## 批量识别
 

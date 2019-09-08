@@ -65,8 +65,9 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
     :param output_path: 识别结果的输出目录，每个页面输出一个JSON文件
     :param v_num: vertical layouts
     :param h_num: horizontal layouts
-    :param reset: 是否重新识别
-    :return: 
+    :param reset: 是否重新识别，如果为clean则执行完成后删除结果文件
+    :param ip: OCR容器的IP
+    :return: 指定了image_file时返回结果对象，指定了image_path时返回识别的页面数
     """
 
     def page_recognize(img_file):
@@ -134,7 +135,7 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
     v_num, h_num = int(v_num or 1), int(h_num or 1)
     assert v_num > 0 and h_num > 0
     req = dict(multiple_layouts=v_num > 1 or h_num > 1, v_num=v_num, h_num=h_num)
-    reset = reset in [1, True, '1', 'true']
+    reset = reset in [1, True, '1', 'true', 'clean'] and reset or False
 
     if not path.exists(output_path):
         try:

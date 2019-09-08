@@ -9,15 +9,22 @@ from tornado.web import RequestHandler, Application
 import tornado.ioloop
 from tornado.escape import to_basestring
 from tornado.options import define, options
-from tripitaka_ocr import recognize, cache
 from os import path, remove
+import tripitaka_ocr as c
 import logging
 
 define('port', default=8010, help='run port', type=int)
 define('output_path', default='/home/smjs/output', help='output path', type=str)
 
+c.cache['web_mode'] = True
+c.INPUT_IMAGE_PATH = c.INPUT_IMAGE_PATH.replace(c.ROOT, '')
+c.OUT_TXT_PATH = c.OUT_TXT_PATH.replace(c.ROOT, '')
+
 
 class MainHandler(RequestHandler):
+
+
+class RecognizeHandler(RequestHandler):
     def post(self):
         def print_error(text):
             data['error'] = text
@@ -29,7 +36,7 @@ class MainHandler(RequestHandler):
 
         if data.get('image_path'):
             logging.info(data['image_path'])
-            count = recognize(image_path=data['image_path'], reset=data.get('reset'),
+            count = c.recognize(image_path=data['image_path'], reset=data.get('reset'),
                               v_num=data.get('v_num'), h_num=data.get('h_num'))
             return self.write(str(count))
 
@@ -43,8 +50,8 @@ class MainHandler(RequestHandler):
             with open(image_file, 'wb') as f:
                 f.write(img[0]['body'])
 
-        cache['print_error'] = print_error
-        r = recognize(image_file=image_file, v_num=data.get('v_num'), h_num=data.get('h_num'), reset='clean')
+        c.cache['print_error'] = print_error
+        r = c.recognize(image_file=image_file, v_num=data.get('v_num'), h_num=data.get('h_num'), reset='clean')
         self.write(r if r else data.get('error', 'fail'))
         if img:
             remove(image_file)
@@ -53,6 +60,7 @@ class MainHandler(RequestHandler):
 def make_app():
     return Application([
         (r'/', MainHandler),
+        (r'/ocr', RecognizeHandler),
     ], debug=True)
 
 
@@ -66,4 +74,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         logging.info('Stop the service')
 
-    # Test: curl http://127.0.0.1:8010 -X POST -F "file=@/foo/bar/JS_122_1196.gif"
+    # Test: curl http://127.0.0.1:8010/ocr -X POST -F "file=@/foo/bar/JS_122_1196.gif"

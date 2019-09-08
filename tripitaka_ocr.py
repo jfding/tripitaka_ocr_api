@@ -18,7 +18,7 @@ import time
 ROOT = '/srv/deeptext.v3'
 INPUT_IMAGE_PATH = '/srv/deeptext.v3/Web_v2/cache/images/'
 OUT_TXT_PATH = '/srv/deeptext.v3/Web_v2/cache/recognition_label/'
-cache = dict(count=0)
+cache = dict(count=0, web_mode=False)
 
 
 def print_error(text):
@@ -73,6 +73,8 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
         if not reset and path.exists(out_file):
             return
 
+        if cache['web_mode']:
+            img_file = img_file.replace(ROOT, '')
         im = Image.open(img_file)
         if not im:
             print_error('%s not exist\n' % img_file)
@@ -83,11 +85,9 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
         if not img_file.lower().endswith('.jpg'):
             img_l = im.convert('L')
             img_l.save(jpg_file)
-            img_l.close()
         else:
             system('rm -f {0}; ln -fs {1} {0}'.format(jpg_file, img_file))
         img_file = jpg_file
-        im.close()
 
         txt_files = [path.join(OUT_TXT_PATH, '%s_task%d.txt' % (name, i)) for i in range(1, 4)]
         system('rm -f %s;' % ' '.join(txt_files))
@@ -115,14 +115,14 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
             if path.exists(txt_files[2]):
                 texts = [t.strip() for t in open(txt_files[2]).readlines()]
 
-            r.update(dict(cc=cc, chars_pos=pos, chars_text=text, lines_text=texts,
+            r.update(dict(chars_cc=cc, chars_pos=pos, chars_text=text, lines_text=texts,
                           lines_pos=line_rec.get('Line_coors'), num_pos=line_rec.get('Num_coor')))
             with open(out_file, 'w') as f:
                 json.dump(r, f, ensure_ascii=False)
             cache['count'] += 1
 
         print('%s: %d chars, %d lines, %d %d %d ms' % (name, len(pos), len(texts), ms1, ms2, ms3))
-        if ROOT in img_file:
+        if img_file.startswith('/Web_v2/'):
             system('rm -f %s;' % img_file)
         if reset == 'clean':
             system('rm -f %s;' % out_file)
@@ -144,6 +144,8 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
     if image_file:
         return page_recognize(image_file)
     elif image_path:
+        if cache['web_mode']:
+            image_path = image_path.replace(ROOT, '')
         assert path.exists(image_path)
         match = re.compile(r'\.(jpg|gif|png|tiff|tif)$')
         files = glob(path.join(image_path, '*', '*.*')) + glob(path.join(image_path, '*.*'))

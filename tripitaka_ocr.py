@@ -24,8 +24,8 @@ cache = dict(count=0, web_mode=False)
 
 def print_error(text):
     if cache.get('print_error'):
-        cache['print_error'](text.strip())
-    sys.stderr.write(text)
+        cache['print_error'](text)
+    sys.stderr.write(text + '\n')
 
 
 def call_server(name, req, ip, port, timeout=120):
@@ -36,7 +36,7 @@ def call_server(name, req, ip, port, timeout=120):
         s.connect((ip, port))
         time.sleep(0.1)
     except ConnectionError:
-        print_error('Connection %s:%d refused\n' % (ip, port))
+        print_error('Connection %s:%d refused' % (ip, port))
         return 0, None
     try:
         s.settimeout(timeout)
@@ -46,10 +46,10 @@ def call_server(name, req, ip, port, timeout=120):
         if result.startswith('{'):
             result = json.loads(result)
         else:
-            print_error('%s: %s\n' % (name, result))
+            print_error('%s: %s' % (name, result))
             result = None
     except (OSError, ValueError) as e:
-        print_error('[%s:%d] %s: %s\n' % (ip, port, name, str(e).split(']')[-1]))
+        print_error('[%s:%d] %s: %s' % (ip, port, name, str(e).split(']')[-1]))
     finally:
         s.close()
 
@@ -73,14 +73,13 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
         name = path.basename(path.splitext(img_file)[0])
         out_file = path.join(output_path, name + '.json')
         if not reset and path.exists(out_file):
-            return
+            return print_error('skip %s' % img_file)
 
         if cache['web_mode']:
             img_file = img_file.replace(ROOT, '')
         im = Image.open(img_file)
         if not im:
-            print_error('%s not exist\n' % img_file)
-            return
+            return print_error('%s not exist' % img_file)
         img_size = im.size
         jpg_file = path.join(INPUT_IMAGE_PATH, '%s.jpg' % name)
 
@@ -141,7 +140,7 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
         try:
             makedirs(output_path)
         except OSError:
-            print_error('fail to create %s\n' % output_path)
+            print_error('fail to create %s' % output_path)
             output_path = '.'
     if image_file:
         return page_recognize(image_file)
@@ -159,7 +158,7 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
         print('%d pages processed' % count)
         return count
     else:
-        print('Usage: python tripitaka_ocr.py --image_file=<filename> --output_path=<path> --v_num=? --h_num=?')
+        print_error('Usage: python tripitaka_ocr.py --image_file=<filename> --output_path=<path> --v_num=? --h_num=?')
 
 
 if __name__ == '__main__':

@@ -33,7 +33,7 @@ def call_server(name, req, ip, port, timeout=120):
     start_time = datetime.now()
     result = None
     try:
-        s.connect(('127.0.0.1', port))
+        s.connect((ip, port))
         time.sleep(0.1)
     except ConnectionError:
         print_error('Connection %s:%d refused\n' % (ip, port))

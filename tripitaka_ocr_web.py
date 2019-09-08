@@ -22,6 +22,8 @@ c.OUT_TXT_PATH = c.OUT_TXT_PATH.replace(c.ROOT, '')
 
 
 class MainHandler(RequestHandler):
+    def get(self):
+        return self.write('Tripitaka OCR API v%s, %d pages processed.' % (c.__version__, c.cache['count']))
 
 
 class RecognizeHandler(RequestHandler):

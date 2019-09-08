@@ -36,7 +36,7 @@ def call_server(name, req, ip, port, timeout=120):
         s.connect(('127.0.0.1', port))
         time.sleep(0.1)
     except ConnectionError:
-        print_error('Connection %d refused\n' % port)
+        print_error('Connection %s:%d refused\n' % (ip, port))
         return 0, None
     try:
         s.settimeout(timeout)
@@ -49,7 +49,7 @@ def call_server(name, req, ip, port, timeout=120):
             print_error('%s: %s\n' % (name, result))
             result = None
     except (OSError, ValueError) as e:
-        print_error('[%d] %s: %s\n' % (port, name, str(e).split(']')[-1]))
+        print_error('[%s:%d] %s: %s\n' % (ip, port, name, str(e).split(']')[-1]))
     finally:
         s.close()
 

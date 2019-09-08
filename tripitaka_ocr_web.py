@@ -13,9 +13,9 @@ from os import path, remove
 import tripitaka_ocr as c
 import logging
 
-define('port', default=8010, help='run port', type=int)
-define('output_path', default='/home/smjs/output', help='output path', type=str)
-define('socket_ip', default='172.17.0.1', help='output path', type=str)
+define('port', default=8000, help='API service listen port', type=int)
+define('output_path', default='/output', help='output path', type=str)
+define('socket_ip', default='127.0.0.1', help='IP addr of socket services', type=str)
 
 c.cache['web_mode'] = True
 c.INPUT_IMAGE_PATH = c.INPUT_IMAGE_PATH.replace(c.ROOT, '')

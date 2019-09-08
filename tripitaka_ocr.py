@@ -28,7 +28,7 @@ def print_error(text):
     sys.stderr.write(text)
 
 
-def call_server(name, req, port, timeout=120):
+def call_server(name, req, ip, port, timeout=120):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     start_time = datetime.now()
     result = None
@@ -56,7 +56,8 @@ def call_server(name, req, port, timeout=120):
     return round((datetime.now() - start_time).microseconds / 1000), result
 
 
-def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_num=1, h_num=1, reset=False):
+def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_num=1, h_num=1,
+              reset=False, ip='127.0.0.1'):
     """
     OCR主函数
     :param image_path: 图片根路径
@@ -98,9 +99,9 @@ def recognize(image_path='', image_file='', output_path='/home/smjs/output', v_n
                     output_txt=txt_files[1].replace(ROOT, ''))
         req.update(dict(img_file=img_file.replace(ROOT, ''), input_txt=txt_files[0].replace(ROOT, ''),
                         output_txt=txt_files[2].replace(ROOT, '')))
-        ms1, char_detect = call_server(name, req1, 8009)  # 单字检测
-        ms2, char_rec = call_server(name, req2, 8008) if char_detect else (0, 0)  # 单字识别
-        ms3, line_rec = call_server(name, req, 8007) if char_rec else (0, 0)  # 列切分识别
+        ms1, char_detect = call_server(name, req1, ip, 8009)  # 单字检测
+        ms2, char_rec = call_server(name, req2, ip, 8008) if char_detect else (0, 0)  # 单字识别
+        ms3, line_rec = call_server(name, req, ip, 8007) if char_rec else (0, 0)  # 列切分识别
 
         pos, text = [], []  # 每个字框的坐标和文字
         texts = []  # 每列的文字

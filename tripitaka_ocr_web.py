@@ -15,6 +15,7 @@ import logging
 
 define('port', default=8010, help='run port', type=int)
 define('output_path', default='/home/smjs/output', help='output path', type=str)
+define('socket_ip', default='172.17.0.1', help='output path', type=str)
 
 c.cache['web_mode'] = True
 c.INPUT_IMAGE_PATH = c.INPUT_IMAGE_PATH.replace(c.ROOT, '')
@@ -39,7 +40,7 @@ class RecognizeHandler(RequestHandler):
         if data.get('image_path'):
             logging.info(data['image_path'])
             count = c.recognize(image_path=data['image_path'], reset=data.get('reset'),
-                              v_num=data.get('v_num'), h_num=data.get('h_num'))
+                              v_num=data.get('v_num'), h_num=data.get('h_num'), ip=options.socket_ip)
             return self.write(str(count))
 
         data['image_file'] = image_file = img[0]['filename'] if img else data.get('image_file')
@@ -53,7 +54,8 @@ class RecognizeHandler(RequestHandler):
                 f.write(img[0]['body'])
 
         c.cache['print_error'] = print_error
-        r = c.recognize(image_file=image_file, v_num=data.get('v_num'), h_num=data.get('h_num'), reset='clean')
+        r = c.recognize(image_file=image_file, v_num=data.get('v_num'), h_num=data.get('h_num'),
+                        reset='clean', ip=options.socket_ip)
         if r and not r.get('chars_text'):
             r['error'] = data.get('error', 'fail')
         self.write(r if r else data.get('error', 'fail'))

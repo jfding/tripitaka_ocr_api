@@ -12,7 +12,6 @@ from tornado.options import define, options
 from os import path, remove
 import tripitaka_ocr as c
 import logging
-import json
 
 define('port', default=8010, help='run port', type=int)
 define('output_path', default='/home/smjs/output', help='output path', type=str)
@@ -59,7 +58,7 @@ class RecognizeHandler(RequestHandler):
                         reset='clean', ip=options.socket_ip)
         if r and not r.get('chars_text'):
             r['error'] = data.get('error', 'fail')
-        self.write(json.dumps(r, ensure_ascii=False) if r else data.get('error', 'fail'))
+        self.write(r if r else data.get('error', 'fail'))
         if img:
             remove(image_file)
 

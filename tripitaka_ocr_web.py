@@ -54,6 +54,8 @@ class RecognizeHandler(RequestHandler):
 
         c.cache['print_error'] = print_error
         r = c.recognize(image_file=image_file, v_num=data.get('v_num'), h_num=data.get('h_num'), reset='clean')
+        if r and not r.get('chars_text'):
+            r['error'] = data.get('error', 'fail')
         self.write(r if r else data.get('error', 'fail'))
         if img:
             remove(image_file)

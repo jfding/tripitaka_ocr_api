@@ -15,7 +15,7 @@ import sys
 import json
 import time
 
-__version__ = '0.0.2 190908'
+__version__ = '0.0.3 190908'
 ROOT = '/srv/deeptext.v3'
 INPUT_IMAGE_PATH = '/srv/deeptext.v3/Web_v2/cache/images/'
 OUT_TXT_PATH = '/srv/deeptext.v3/Web_v2/cache/recognition_label/'
